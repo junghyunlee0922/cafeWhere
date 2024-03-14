@@ -17,7 +17,6 @@ function ReviewWrite() {
   const navigate = useNavigate();
   const handleReviewCheck = async (e) => {
     e.preventDefault();
-
     const formData = new FormData(e.target);
     formData.append('cafeName', cafe.cafeName);
     formData.append('users', userId);
@@ -30,22 +29,22 @@ function ReviewWrite() {
 
     // const data = Object.fromEntries(formData.entries());
 
-    const data = {
-      ...cafe,
-      score: (cafe.score + rating) / cafe.reviewQuantity,
-      reviewQuantity: cafe.reviewQuantity + 1,
-    };
-
-    await pb.collection('cafe').update(params.id, data);
-
     await pb
       .collection('review')
       .create(formData)
-      .then(() => {
+      .then(async () => {
         alert('전송 완료');
+        navigate(`/detail/${params.id}`);
+
+        const data = {
+          ...cafe,
+          score: (cafe.score + rating) / cafe.reviewQuantity + 1,
+          reviewQuantity: cafe.reviewQuantity + 1,
+          hashtag: [...cafe.hashtag, ...hashtag],
+        };
         resetHashtag();
 
-        navigate(`/detail/${params.id}`);
+        await pb.collection('cafe').update(params.id, data);
       })
       .catch((error) => {
         console.error(error);
